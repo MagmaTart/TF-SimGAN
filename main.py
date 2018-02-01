@@ -10,7 +10,6 @@ batch_size = 128
 history_size = int(batch_size/2)
 history_buffer_size = 512
 history_buffer = [0 for i in range(history_buffer_size)]
-# history_buffer = []
 history_index = 0
 
 history_initialize = True
@@ -28,13 +27,12 @@ sess = tf.Session()
 sess.run(tf.global_variables_initializer())
 
 for i in range(10000):
-    # images = loader.get_next_batch(batch_size=batch_size)
-    # synthetic, real = images, images
     synthetic, real = loader.get_next_batch(batch_size=batch_size), loader.get_next_batch(batch_size=batch_size)
 
     history_train_refined = np.random.rand(1, 64, 64, 3)
     history_train_real = np.random.rand(1, 64, 64, 3)
 
+    # History training
     if history_index > history_buffer_size:
         history_train_refined = np.array([history_buffer[random.randrange(0, history_buffer_size)] for i in range(history_size)])
         history_train_real = loader.get_next_batch(history_size)
@@ -62,6 +60,7 @@ for i in range(10000):
         history_buffer[history_index % history_buffer_size] = history_refines[k]
         history_index += 1
 
+    # Save sample
     if i % 10 == 0:
         print('Sample image saved')
         test = sess.run(model.refined, feed_dict={model.is_history: False, model.synthetic: np.array([real[0]])})
